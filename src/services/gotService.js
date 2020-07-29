@@ -3,7 +3,7 @@ export default class GotService {
       this._apiBase = 'https://www.anapioficeandfire.com/api';
   }
 
-  getResource = async (url) => {
+  async getResource(url){
       const res = await fetch(`${this._apiBase}${url}`);
   
       if (!res.ok) {
@@ -13,12 +13,14 @@ export default class GotService {
       return await res.json();
   }
 
-  getAllBooks() {
-      return this.getResource(`/books/`);
+ async getAllBooks() {
+      const res = await this.getResource(`/books/`);
+      return res.map(this._transformBook);
   }
   
-  getBook(id) {
-      return this.getResource(`/books/${id}/`);
+ async getBook(id) {
+      const book = await this.getResource(`/books/${id}/`);
+      return this._transformBook(book);
   }
   
   async getAllCharacters() {
@@ -31,12 +33,14 @@ export default class GotService {
       return this._transformCharacter(character);
   }
   
-  getAllHouses() {
-      return this.getResource(`/houses/`);
+  async getAllHouses() {
+      const res = await this.getResource(`/houses/`);
+      return res.map(this._transformHouse);
   }
   
-  getHouse(id) {
-      return this.getResource(`/houses/${id}/`);
+  async getHouse(id) {
+      const house = this.getResource(`/houses/${id}/`);
+      return this._transformHouse(house);
   }
 
   isSet(data) {
@@ -46,8 +50,15 @@ export default class GotService {
         return 'no info :('
     }
 }
-  _transformCharacter(char) {
+
+_extractId = (item) => {
+    const idRegExp = /\/([0-9]*)$/;
+    return item.url.match(idRegExp)[1];
+}
+
+  _transformCharacter = (char) => {
       return {
+        id: this._extractId(char),
         name: this.isSet(char.name),
         gender: this.isSet(char.gender),
         born: this.isSet(char.born),
@@ -58,6 +69,7 @@ export default class GotService {
 
   _transformHouse(house) {
       return {
+          id: this._extractId(house),
           name: house.name,
           region: house.region,
           words: house.words,
@@ -69,6 +81,7 @@ export default class GotService {
 
   _transformBook(book) {
       return {
+          id: this._extractId(book),
           name:book.name,
           numberOfPages: book.numberOfPages,
           publiser: book.publiser,
