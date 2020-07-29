@@ -49,7 +49,7 @@ export default class RandomChar extends Component {
         return (
             <div className="random-block rounded">
                 {errorMessage}
-                {spin}
+                {spinner}
                 {content}
             </div>
         );
